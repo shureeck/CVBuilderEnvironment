@@ -1,0 +1,25 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo 'Runtime version:'
+      - java -version
+      - echo 'Maven version'
+      - mvn --version
+      - echo 'AWS CLI version:'
+      - aws --v
+  build:
+    commands:
+      - echo 'Build project strarted'
+      - mvn install
+      - echo 'Buid project finished'
+  post_build:
+    commands:
+      - echo 'Coppy jar file to S3 started'
+      - aws s3 cp $CODEBUILD_SRC_DIR/target/CVBuilder-1.0-shaded.jar s3://$S3_BUCKET/$S3_KEY
+      - echo 'Coppy jar file to S3 finished'
+      - echo 'Deploy to Lambda function started'
+      - aws lambda update-function-code --function-name $LAMBDA_NAME --s3-bucket $S3_BUCKET --s3-key $S3_KEY
+      - echo 'Deploy to Lambda function finished'
+      
